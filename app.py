@@ -36,51 +36,59 @@ def predict_image(model, class_name, img: Image.Image):
     return [(class_name[i], preds[i]) for i in top_idx]
 
 
-# Configuración de la página
 st.set_page_config(
     page_title="Clasificador de Flores",
     page_icon="🌸",
+    layout="centered"
 )
 
-# Título
-st.title("Clasificador de Flores")
-st.write("Sube una imagen de una flor para realizar la clasificación.")
+# Encabezado
+st.markdown("## Clasificador de Flores")
+st.caption("Modelo de clasificación utilizando MobileNetV2")
 
-# Cargar modelo
+st.divider()
+
 model, class_name = load_model()
 
-# Subir imagen
 uploaded_file = st.file_uploader(
-    "Selecciona una imagen",
+    "Seleccione una imagen",
     type=["jpg", "jpeg", "png"]
 )
 
 if uploaded_file is not None:
+
     img = Image.open(uploaded_file)
 
-    # Mostrar imagen
-    st.image(
-        img,
-        caption="Imagen cargada",
-        use_container_width=True
-    )
+    col1, col2 = st.columns([1.3, 1])
 
-    # Predicción
+    with col1:
+        st.image(
+            img,
+            caption="Imagen cargada",
+            use_container_width=True
+        )
+
     results = predict_image(model, class_name, img)
     top_class, top_prob = results[0]
 
-    # Resultado
-    st.subheader("Resultado")
-    st.write(
-        f"**Predicción:** {LABELS_ES.get(top_class, top_class)} "
-        f"({top_prob * 100:.2f}%)"
-    )
+    with col2:
+        st.subheader("Resultado")
+        st.metric(
+            "Clase",
+            LABELS_ES.get(top_class, top_class)
+        )
+        st.metric(
+            "Confianza",
+            f"{top_prob*100:.2f}%"
+        )
 
-    # Probabilidades
-    st.subheader("Probabilidades por categoría")
+    st.divider()
+
+    st.subheader("Probabilidades")
+
     for raw, prob in results:
-        st.write(f"{LABELS_ES.get(raw, raw)}: {prob * 100:.2f}%")
-        st.progress(float(prob))
+        st.write(f"**{LABELS_ES.get(raw, raw)}**")
+        st.progress(float(prob), text=f"{prob*100:.2f}%")
 
-st.markdown("---")
+st.divider()
 st.caption("Desarrollado por Arleth Adyani Chevez Bonilla")
