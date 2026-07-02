@@ -10,11 +10,11 @@ MODEL_PATH = "modelo_flores_mobilenet/flowers_mobilenet.h5"
 CLASSES_PATH = "modelo_flores_mobilenet/class_name.json"
 
 LABELS_ES = {
-    "daisy": "Margarita",
-    "dandelion": "Diente de león",
-    "rose": "Rosa",
-    "sunflower": "Girasol",
-    "tulip": "Tulipán",
+    "daisy": "🌼 Margarita",
+    "dandelion": "🌾 Diente de león",
+    "rose": "🌹 Rosa",
+    "sunflower": "🌻 Girasol",
+    "tulip": "🌷 Tulipán",
 }
 
 
@@ -36,24 +36,69 @@ def predict_image(model, class_name, img: Image.Image):
     return [(class_name[i], preds[i]) for i in top_idx]
 
 
-st.set_page_config(page_title="🌷🌹🌻 Clasificador de Flores 🌼🌸🌺")
-st.title("Clasificador de Flores con MobileNetV2 - Arleth Adyani Chevez Bonilla")
-st.write("Sube una imagen de una flor y el modelo predecirá su categoría.")
+# ---------------- CONFIGURACIÓN ----------------
+
+st.set_page_config(
+    page_title="Clasificador de Flores",
+    page_icon="🌸",
+    layout="centered"
+)
+
+# ---------------- TÍTULO ----------------
+
+st.title("🌸 Clasificador de Flores")
+st.markdown("###  Modelo MobileNetV2")
+
+st.info(
+    "📷 Sube una imagen de una flor y el modelo predecirá su categoría."
+)
+
+st.divider()
 
 model, class_name = load_model()
 
-uploaded_file = st.file_uploader("Sube una imagen", type=["jpg", "jpeg", "png"])
+uploaded_file = st.file_uploader(
+    "Selecciona una imagen",
+    type=["jpg", "jpeg", "png"]
+)
 
 if uploaded_file is not None:
+
     img = Image.open(uploaded_file)
-    st.image(img, caption="Imagen cargada", use_container_width=True)
 
-    results = predict_image(model, class_name, img)
+    col1, col2 = st.columns([1, 1])
 
-    top_class, top_prob = results[0]
-    st.success(f"Predicción: **{LABELS_ES.get(top_class, top_class)}** ({top_prob*100:.2f}%)")
+    with col1:
+        st.image(
+            img,
+            caption="📷 Imagen cargada",
+            use_container_width=True
+        )
 
-    st.subheader("Probabilidades por categoría")
+    with col2:
+
+        results = predict_image(model, class_name, img)
+
+        top_class, top_prob = results[0]
+
+        st.success(
+            f"🌼 **Predicción:** {LABELS_ES.get(top_class, top_class)}"
+        )
+
+        st.metric(
+            "Confianza",
+            f"{top_prob*100:.2f}%"
+        )
+
+    st.divider()
+
+    st.subheader("Probabilidades")
+
     for raw, prob in results:
-        st.write(f"{LABELS_ES.get(raw, raw)}: {prob*100:.2f}%")
-        st.progress(float(prob))
+        nombre = LABELS_ES.get(raw, raw)
+        st.write(f"**{nombre}**")
+        st.progress(float(prob), text=f"{prob*100:.2f}%")
+
+st.divider()
+
+st.caption("Desarrollado por Arleth Adyani Chevez Bonilla")
