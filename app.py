@@ -71,7 +71,7 @@ if uploaded_file is not None:
     with col1:
         st.image(
             img,
-            caption="📷 Imagen cargada",
+            caption="Imagen cargada",
             use_container_width=True
         )
 
